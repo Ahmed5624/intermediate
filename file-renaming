@@ -1,0 +1,45 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MOD 1000000007
+#define MAX_LEN 1005
+
+// Function to rename the file and return the result
+int renameFile(char* newName, char* oldName) {
+    int n = strlen(newName);
+    int m = strlen(oldName);
+
+    int dp[MAX_LEN] = {0};
+    dp[0] = 1;
+
+    for (int i = 1; i <= n; i++) {
+        int dpp[MAX_LEN] = {0};
+
+        for (int j = i; j <= m; j++) {
+            dpp[j] = dpp[j - 1];
+            if (newName[i - 1] == oldName[j - 1]) {
+                dpp[j] = (dpp[j] + dp[j - 1]) % MOD;
+            }
+        }
+
+        for (int j = 0; j <= m; j++) {
+            dp[j] = dpp[j];
+        }
+    }
+
+    return dp[m];
+}
+
+int main() {
+    char newName[MAX_LEN];
+    scanf("%s", newName);
+
+    char oldName[MAX_LEN];
+    scanf("%s", oldName);
+
+    int result = renameFile(newName, oldName);
+
+    printf("%d\n", result);
+
+    return 0;
+}
