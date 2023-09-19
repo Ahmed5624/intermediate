@@ -1,0 +1,105 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX_N 200005
+
+// Structure to represent nodes in the tree
+struct Node {
+    struct Node* parent;
+    int l;
+    int r;
+    struct Node* lc;
+    struct Node* rc;
+    long long val;
+};
+
+// Function to initialize a new node
+struct Node* createNode(struct Node* parent, int l, int r) {
+    struct Node* node = (struct Node*)malloc(sizeof(struct Node));
+    node->parent = parent;
+    node->l = l;
+    node->r = r;
+    node->lc = NULL;
+    node->rc = NULL;
+    node->val = r - l;
+    return node;
+}
+
+// Function to perform split operation
+void split(struct Node* node, int x) {
+    // No balancing, but doesn't seem to give timeouts.
+    if (x == node->l || x == node->r) {
+        // Split lies on borders.
+        return;
+    }
+    if (node->lc) {
+        if (x == node->lc->r) {
+            // Split lies on mid split.
+            return;
+        }
+        if (x < node->lc->r) {
+            split(node->lc, x);
+        } else {
+            split(node->rc, x);
+        }
+        node->val = node->lc->val + node->rc->val;
+    } else {
+        node->lc = createNode(node, node->l, x);
+        node->rc = createNode(node, x, node->r);
+        node->val = (long long)(x - node->l) + (long long)(node->r - x);
+    }
+}
+
+// Function to get maximum areas
+long long* getMaxArea(int w, int h, int* isVertical, int* distance, int queries) {
+    struct Node* w_root = createNode(NULL, 0, w);
+    struct Node* h_root = createNode(NULL, 0, h);
+
+    long long* ans = (long long*)malloc(queries * sizeof(long long));
+
+    for (int i = 0; i < queries; i++) {
+        if (isVertical[i]) {
+            split(w_root, distance[i]);
+        } else {
+            split(h_root, distance[i]);
+        }
+        ans[i] = w_root->val * h_root->val;
+    }
+
+    return ans;
+}
+
+int main() {
+    int w, h;
+    scanf("%d", &w);
+    scanf("%d", &h);
+
+    int isVertical_count;
+    scanf("%d", &isVertical_count);
+
+    int isVertical[MAX_N];
+
+    for (int i = 0; i < isVertical_count; i++) {
+        int isVertical_item;
+        scanf("%d", &isVertical_item);
+        isVertical[i] = (isVertical_item != 0);
+    }
+
+    int distance_count;
+    scanf("%d", &distance_count);
+
+    int distance[MAX_N];
+
+    for (int i = 0; i < distance_count; i++) {
+        scanf("%d", &distance[i]);
+    }
+
+    long long* result = getMaxArea(w, h, isVertical, distance, distance_count);
+
+    for (int i = 0; i < distance_count; i++) {
+        printf("%lld\n", result[i]);
+    }
+
+    return 0;
+}
