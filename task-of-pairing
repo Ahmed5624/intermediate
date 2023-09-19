@@ -1,0 +1,97 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+#define MAX_N 100005
+
+// Function to find the maximum of two integers
+int max(int a, int b) {
+    return (a > b) ? a : b;
+}
+
+// Function to find the minimum of two integers
+int min(int a, int b) {
+    return (a < b) ? a : b;
+}
+
+// Function to perform the task of pairing
+long long taskOfPairing(int freq[], int freq_count) {
+    int n = freq_count;
+    long long ans = 0;
+    long long inf = LLONG_MAX;
+    
+    if (n == 1) {
+        return freq[0] / 2;
+    }
+    
+    // Normalize the frequencies.
+    for (int i = 0; i < n; i++) {
+        int x = 0;
+        if (freq[i] <= 2) {
+            x = 0;
+        } else {
+            x = ((freq[i] + 1) / 2) - 1;
+        }
+        ans += x;
+        freq[i] -= 2 * x;
+    }
+    
+    // Initialize dp array with -inf.
+    long long dp[6] = {-inf, -inf, -inf, -inf, -inf, -inf};
+    dp[freq[0]] = 0;
+    if (freq[0] == 2) {
+        dp[0] = 1;
+    }
+    
+    for (int i = 1; i < n; i++) {
+        long long dpp[6] = {-inf, -inf, -inf, -inf, -inf, -inf};
+        int f = freq[i];
+        
+        // Case: Do nothing.
+        dpp[f] = max(dp[0], max(dp[1], max(dp[2], max(dp[3], max(dp[4], dp[5])))));
+        
+        // Case: Just get one from previous.
+        dpp[f + 3] = max(dp[1], max(dp[2], max(dp[4], dp[5])));
+        
+        if (f >= 1) {
+            // Case: Previous has at least one movable or immovable. Combine once.
+            dpp[f - 1] = max(dp[1], max(dp[2], max(dp[4], dp[5]))) + 1;
+            
+            // Case: Previous has movable and immovable. Combine with immovable and get movable.
+            dpp[f - 1 + 3] = max(dpp[f - 1 + 3], max(dp[4], dp[5]) + 1);
+        }
+        
+        if (f >= 2) {
+            // Case: Combine own two.
+            dpp[f - 2] = max(dp[0], max(dp[1], max(dp[2], max(dp[3], max(dp[4], dp[5]))))) + 1;
+            
+            // Case: Combine own two and try to get movable from previous.
+            dpp[f - 2 + 3] = max(dp[1], max(dp[2], max(dp[4], dp[5]))) + 1;
+        }
+        
+        // Update dp array.
+        for (int j = 0; j < 6; j++) {
+            dp[j] = dpp[j];
+        }
+    }
+    
+    // Calculate the final answer.
+    return ans + max(dp[0], max(dp[1], max(dp[2], max(dp[3], max(dp[4], dp[5])))));
+}
+
+int main() {
+    int freq_count;
+    scanf("%d", &freq_count);
+
+    int freq[MAX_N];
+
+    for (int i = 0; i < freq_count; i++) {
+        scanf("%d", &freq[i]);
+    }
+
+    long long result = taskOfPairing(freq, freq_count);
+
+    printf("%lld\n", result);
+
+    return 0;
+}
