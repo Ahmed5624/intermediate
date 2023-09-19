@@ -1,0 +1,86 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+// Define a structure to represent key-value pairs
+struct KeyValue {
+    int key;
+    int value;
+};
+
+// Function to check if a number is a power of 2
+bool isPowerOf2(int x) {
+    return (x > 0) && ((x & (x - 1)) == 0);
+}
+
+// Function to compare KeyValue structs for sorting
+int compare(const void *a, const void *b) {
+    return ((struct KeyValue *)a)->key - ((struct KeyValue *)b)->key;
+}
+
+// Function to count pairs
+long long countPairs(int arr_count, int* arr) {
+    // Create a hash map using an array of KeyValue structures
+    struct KeyValue hash_map[arr_count];
+    int hash_map_size = 0;
+
+    // Initialize the hash map
+    for (int i = 0; i < arr_count; i++) {
+        bool found = false;
+        for (int j = 0; j < hash_map_size; j++) {
+            if (hash_map[j].key == arr[i]) {
+                hash_map[j].value++;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            hash_map[hash_map_size].key = arr[i];
+            hash_map[hash_map_size].value = 1;
+            hash_map_size++;
+        }
+    }
+
+    // Sort the hash map by keys
+    qsort(hash_map, hash_map_size, sizeof(struct KeyValue), compare);
+
+    long long ans = 0;
+
+    // Count pairs
+    for (int i = 0; i < hash_map_size; i++) {
+        int a = hash_map[i].key;
+        int a_count = hash_map[i].value;
+        for (int j = i; j < hash_map_size; j++) {
+            int b = hash_map[j].key;
+            int b_count = hash_map[j].value;
+            if (isPowerOf2(a & b)) {
+                if (a == b) {
+                    ans += (long long)(a_count * (a_count - 1)) / 2;
+                } else {
+                    ans += (long long)(a_count * b_count);
+                }
+            }
+        }
+    }
+
+    return ans;
+}
+
+int main() {
+    int arr_count;
+    scanf("%d", &arr_count);
+
+    int* arr = (int*)malloc(arr_count * sizeof(int));
+
+    for (int i = 0; i < arr_count; i++) {
+        scanf("%d", &arr[i]);
+    }
+
+    long long result = countPairs(arr_count, arr);
+
+    printf("%lld\n", result);
+
+    free(arr);
+
+    return 0;
+}
