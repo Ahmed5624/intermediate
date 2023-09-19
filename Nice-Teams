@@ -1,0 +1,62 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int cmp(const void *a, const void *b) {
+    return (*(int*)a - *(int*)b);
+}
+
+int maxPairs(int skillLevel_count, int* skillLevel, int minDiff) {
+    qsort(skillLevel, skillLevel_count, sizeof(int), cmp);
+    int n = skillLevel_count;
+    int i = 0;
+    int* x = malloc(n / 2 * sizeof(int));
+    int x_size = 0;
+
+    for (int j = 0; j < n / 2; j++) {
+        while (i < n && skillLevel[i] - skillLevel[j] < minDiff) {
+            i++;
+        }
+
+        if (i >= n) {
+            break;
+        }
+
+        x[x_size] = i;
+        x_size++;
+    }
+
+    int ans = 0;
+    int k = n - 1;
+
+    for (int y = x_size - 1; y >= 0; y--) {
+        if (x[y] <= k) {
+            ans++;
+            k--;
+        }
+    }
+
+    free(x);
+    return ans;
+}
+
+int main() {
+    int skillLevel_count;
+    scanf("%d", &skillLevel_count);
+
+    int* skillLevel = (int*)malloc(skillLevel_count * sizeof(int));
+
+    for (int i = 0; i < skillLevel_count; i++) {
+        scanf("%d", &skillLevel[i]);
+    }
+
+    int minDiff;
+    scanf("%d", &minDiff);
+
+    int result = maxPairs(skillLevel_count, skillLevel, minDiff);
+
+    printf("%d\n", result);
+
+    free(skillLevel);
+
+    return 0;
+}
