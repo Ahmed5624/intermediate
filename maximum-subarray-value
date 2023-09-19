@@ -1,0 +1,52 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+long long maxSubarrayValue(int arr_count, int* arr) {
+    long long* even = (long long*)calloc(arr_count + 1, sizeof(long long));
+    long long* odd = (long long*)calloc(arr_count + 1, sizeof(long long));
+    
+    for (int i = 0; i < arr_count; i++) {
+        if (i % 2 == 0) {
+            even[i + 1] = even[i] + arr[i];
+            odd[i + 1] = odd[i];
+        } else {
+            even[i + 1] = even[i];
+            odd[i + 1] = odd[i] + arr[i];
+        }
+    }
+    
+    long long ans = 0;
+    
+    for (int i = 0; i < arr_count; i++) {
+        for (int j = i + 1; j <= arr_count; j++) {
+            long long a = even[j] - even[i];
+            long long b = odd[j] - odd[i];
+            long long diff = a - b;
+            ans = (diff * diff > ans) ? diff * diff : ans;
+        }
+    }
+    
+    free(even);
+    free(odd);
+    
+    return ans;
+}
+
+int main() {
+    int arr_count;
+    scanf("%d", &arr_count);
+
+    int* arr = (int*)malloc(arr_count * sizeof(int));
+
+    for (int i = 0; i < arr_count; i++) {
+        scanf("%d", &arr[i]);
+    }
+
+    long long result = maxSubarrayValue(arr_count, arr);
+
+    printf("%lld\n", result);
+
+    free(arr);
+
+    return 0;
+}
