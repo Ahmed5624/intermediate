@@ -1,0 +1,92 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+#define MAX_N 100005
+
+// Structure to represent key-value pairs
+struct KeyValue {
+    int key;
+    int value[2];
+};
+
+// Function to compare KeyValue structs for sorting
+int compare(const void *a, const void *b) {
+    return ((struct KeyValue *)a)->key - ((struct KeyValue *)b)->key;
+}
+
+// Function to find the minimum of two integers
+int min(int a, int b) {
+    return (a < b) ? a : b;
+}
+
+// Function to calculate minimum operations
+int minOperations(int arr_count, int* arr, int threshold, int d) {
+    // Create a hash map using an array of KeyValue structures
+    struct KeyValue hash_map[MAX_N];
+    int hash_map_size = 0;
+
+    // Initialize the hash map
+    for (int i = 0; i < arr_count; i++) {
+        int found = -1;
+        for (int j = 0; j < hash_map_size; j++) {
+            if (hash_map[j].key == arr[i]) {
+                found = j;
+                break;
+            }
+        }
+        if (found != -1) {
+            hash_map[found].value[0]++;
+        } else {
+            hash_map[hash_map_size].key = arr[i];
+            hash_map[hash_map_size].value[0] = 1;
+            hash_map[hash_map_size].value[1] = 0;
+            hash_map_size++;
+        }
+    }
+
+    // Sort the hash map by keys
+    qsort(hash_map, hash_map_size, sizeof(struct KeyValue), compare);
+
+    int ans = INT_MAX;
+
+    // Calculate minimum operations
+    for (int i = 0; i < hash_map_size; i++) {
+        int x = hash_map[i].key;
+        int steps = 0;
+        while (1) {
+            hash_map[i].value[1] += steps;
+            if (hash_map[i].value[0] >= threshold) {
+                ans = min(ans, hash_map[i].value[1]);
+            }
+            if (x == 0) {
+                break;
+            }
+            x /= d;
+            steps++;
+        }
+    }
+
+    return ans;
+}
+
+int main() {
+    int arr_count;
+    scanf("%d", &arr_count);
+
+    int arr[MAX_N];
+
+    for (int i = 0; i < arr_count; i++) {
+        scanf("%d", &arr[i]);
+    }
+
+    int threshold, d;
+    scanf("%d", &threshold);
+    scanf("%d", &d);
+
+    int result = minOperations(arr_count, arr, threshold, d);
+
+    printf("%d\n", result);
+
+    return 0;
+}
