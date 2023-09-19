@@ -1,0 +1,85 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define A_LIMIT 1000000
+#define MOD 1000000007
+
+// Structure to represent Fenwick Tree
+struct FWT {
+    int size;
+    long long* arr;
+};
+
+// Function to initialize a new Fenwick Tree
+struct FWT* createFWT(int size) {
+    struct FWT* fwt = (struct FWT*)malloc(sizeof(struct FWT));
+    fwt->size = size + 1;
+    fwt->arr = (long long*)calloc(fwt->size, sizeof(long long));
+    return fwt;
+}
+
+// Function to add a value to the Fenwick Tree
+void add(struct FWT* fwt, int x, long long val) {
+    if (x == 0) {
+        fwt->arr[0] += val;
+        return;
+    }
+    while (x < fwt->size) {
+        fwt->arr[x] += val;
+        x += x & (-x);
+    }
+}
+
+// Function to calculate the rank of a value in the Fenwick Tree
+long long rank(struct FWT* fwt, int x) {
+    if (x < 0) {
+        return 0;
+    }
+    long long res = fwt->arr[0];
+    while (x > 0) {
+        res += fwt->arr[x];
+        x &= x - 1;
+    }
+    return res;
+}
+
+// Function to calculate the sortedSum
+long long sortedSum(int a[], int a_count) {
+    struct FWT* pre = createFWT(A_LIMIT + 1);
+    struct FWT* post = createFWT(A_LIMIT + 1);
+    long long cur_fn = 0, ans = 0, total = 0;
+    
+    for (int i = 0; i < a_count; i++) {
+        int pos = rank(pre, a[i]) + 1;
+        long long greater = total - rank(post, a[i]);
+        cur_fn = (cur_fn + pos * a[i] + greater) % MOD;
+        ans = (ans + cur_fn) % MOD;
+        add(pre, a[i], 1);
+        add(post, a[i], a[i]);
+        total += a[i];
+    }
+    
+    free(pre->arr);
+    free(pre);
+    free(post->arr);
+    free(post);
+    
+    return ans;
+}
+
+int main() {
+    int a_count;
+    scanf("%d", &a_count);
+
+    int a[a_count];
+
+    for (int i = 0; i < a_count; i++) {
+        scanf("%d", &a[i]);
+    }
+
+    long long result = sortedSum(a, a_count);
+
+    printf("%lld\n", result);
+
+    return 0;
+}
